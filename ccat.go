@@ -8,7 +8,6 @@ import (
 	"syscall"
 
 	"fmt"
-
 	"github.com/mattn/go-isatty"
 )
 
@@ -21,10 +20,14 @@ type AutoColorPrinter struct {
 }
 
 func (a AutoColorPrinter) Print(r io.Reader, w io.Writer) error {
-	if isatty.IsTerminal(uintptr(syscall.Stdout)) {
-		return ColorPrinter{a.ColorPalettes}.Print(r, w)
+	if true {
+		return render(r, w, a.ColorPalettes)
 	} else {
-		return PlainTextPrinter{}.Print(r, w)
+		if isatty.IsTerminal(uintptr(syscall.Stdout)) {
+			return ColorPrinter{a.ColorPalettes}.Print(r, w)
+		} else {
+			return PlainTextPrinter{}.Print(r, w)
+		}
 	}
 }
 
@@ -42,14 +45,6 @@ type PlainTextPrinter struct {
 func (p PlainTextPrinter) Print(r io.Reader, w io.Writer) error {
 	_, err := io.Copy(w, r)
 	return err
-}
-
-type HtmlPrinter struct {
-	ColorPalettes ColorPalettes
-}
-
-func (c HtmlPrinter) Print(r io.Reader, w io.Writer) error {
-	return HtmlPrint(r, w, c.ColorPalettes)
 }
 
 func CCat(fname string, p CCatPrinter, w io.Writer) error {

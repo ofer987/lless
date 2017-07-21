@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"log"
 
@@ -15,7 +16,6 @@ const (
 type ccatCmd struct {
 	BG          string
 	Color       string
-	ColorCodes  mapValue
 	HTML        bool
 	ShowPalette bool
 	ShowVersion bool
@@ -36,14 +36,6 @@ func (c *ccatCmd) Run(cmd *cobra.Command, args []string) {
 		colorPalettes = LightColorPalettes
 	}
 
-	// override color codes
-	for k, v := range c.ColorCodes {
-		ok := colorPalettes.Set(k, v)
-		if !ok {
-			log.Fatal(fmt.Errorf("unknown color code: %s", k))
-		}
-	}
-
 	if c.ShowPalette {
 		fmt.Fprintf(stdout, `Applied color codes:
 
@@ -61,35 +53,18 @@ Value of color can be %s
 		return
 	}
 
-	var printer CCatPrinter
-	if c.HTML {
-		printer = HtmlPrinter{colorPalettes}
-	} else if c.Color == "always" {
-		printer = ColorPrinter{colorPalettes}
-	} else if c.Color == "never" {
-		printer = PlainTextPrinter{}
-	} else {
-		printer = AutoColorPrinter{colorPalettes}
-	}
+	if len(args) < 1 {
+		err := errors.New("Have to specify at least one filename")
+		log.Fatal(err)
 
-	// if there's no args, read from stdin
-	if len(args) == 0 {
-		args = []string{readFromStdin}
+		return
 	}
-
-	for _, arg := range args {
-		err := CCat(arg, printer, stdout)
-		if err != nil {
-			log.Fatal(err)
-		}
-	}
+	handle(args[0], colorPalettes)
 }
 
 func main() {
 	log.SetFlags(0)
-	ccatCmd := &ccatCmd{
-		ColorCodes: make(mapValue),
-	}
+	ccatCmd := &ccatCmd{}
 	rootCmd := &cobra.Command{
 		Use:  "ccat [OPTION]... [FILE]...",
 		Long: "Colorize FILE(s), or standard input, to standard output.",
@@ -121,7 +96,7 @@ Examples:
 
 	rootCmd.PersistentFlags().StringVarP(&ccatCmd.BG, "bg", "", "light", `set to "light" or "dark" depending on the terminal's background`)
 	rootCmd.PersistentFlags().StringVarP(&ccatCmd.Color, "color", "C", "auto", `colorize the output; value can be "never", "always" or "auto"`)
-	rootCmd.PersistentFlags().VarP(&ccatCmd.ColorCodes, "color-code", "G", `set color codes`)
+	// rootCmd.PersistentFlags().VarP(&ccatCmd.ColorCodes, "color-code", "G", `set color codes`)
 	rootCmd.PersistentFlags().BoolVarP(&ccatCmd.HTML, "html", "", false, `output html`)
 	rootCmd.PersistentFlags().BoolVarP(&ccatCmd.ShowPalette, "palette", "", false, `show color palettes`)
 	rootCmd.PersistentFlags().BoolVarP(&ccatCmd.ShowVersion, "version", "v", false, `show version`)

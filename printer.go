@@ -3,9 +3,10 @@ package main
 import (
 	"fmt"
 	"io"
-	"sort"
-	"strings"
+	// "sort"
+	// "strings"
 
+	"github.com/nsf/termbox-go"
 	"github.com/sourcegraph/syntaxhighlight"
 )
 
@@ -39,33 +40,33 @@ var (
 	}
 
 	LightColorPalettes = ColorPalettes{
-		stringKind:        "brown",
-		keywordKind:       "darkblue",
-		commentKind:       "lightgrey",
-		typeKind:          "teal",
-		literalKind:       "teal",
-		punctuationKind:   "darkred",
-		plaintextKind:     "darkblue",
-		tagKind:           "blue",
-		htmlTagKind:       "lightgreen",
-		htmlAttrNameKind:  "blue",
-		htmlAttrValueKind: "green",
-		decimalKind:       "darkblue",
+		stringKind:        termbox.ColorBlack,
+		keywordKind:       termbox.ColorBlack,
+		commentKind:       termbox.ColorBlack,
+		typeKind:          termbox.ColorBlack,
+		literalKind:       termbox.ColorBlack,
+		punctuationKind:   termbox.ColorBlack,
+		plaintextKind:     termbox.ColorBlack,
+		tagKind:           termbox.ColorBlack,
+		htmlTagKind:       termbox.ColorBlack,
+		htmlAttrNameKind:  termbox.ColorBlack,
+		htmlAttrValueKind: termbox.ColorBlack,
+		decimalKind:       termbox.ColorBlack,
 	}
 
 	DarkColorPalettes = ColorPalettes{
-		stringKind:        "brown",
-		keywordKind:       "blue",
-		commentKind:       "darkgrey",
-		typeKind:          "turquoise",
-		literalKind:       "turquoise",
-		punctuationKind:   "red",
-		plaintextKind:     "blue",
-		tagKind:           "blue",
-		htmlTagKind:       "lightgreen",
-		htmlAttrNameKind:  "blue",
-		htmlAttrValueKind: "green",
-		decimalKind:       "blue",
+		stringKind:        termbox.ColorBlack,
+		keywordKind:       termbox.ColorBlack,
+		commentKind:       termbox.ColorBlack,
+		typeKind:          termbox.ColorBlack,
+		literalKind:       termbox.ColorBlack,
+		punctuationKind:   termbox.ColorBlack,
+		plaintextKind:     termbox.ColorBlack,
+		tagKind:           termbox.ColorBlack,
+		htmlTagKind:       termbox.ColorBlack,
+		htmlAttrNameKind:  termbox.ColorBlack,
+		htmlAttrValueKind: termbox.ColorBlack,
+		decimalKind:       termbox.ColorBlack,
 	}
 
 	// cache kind name and syntax highlight kind
@@ -91,9 +92,9 @@ type kind struct {
 	Kind syntaxhighlight.Kind
 }
 
-type ColorPalettes map[kind]string
+type ColorPalettes map[kind]termbox.Attribute
 
-func (c ColorPalettes) Set(k, v string) bool {
+func (c ColorPalettes) Set(k string, v termbox.Attribute) bool {
 	kind, ok := kindsByName[k]
 	if ok {
 		c[kind] = v
@@ -102,10 +103,10 @@ func (c ColorPalettes) Set(k, v string) bool {
 	return ok
 }
 
-func (c ColorPalettes) Get(k syntaxhighlight.Kind) string {
+func (c ColorPalettes) Get(k syntaxhighlight.Kind) termbox.Attribute {
 	// ignore whitespace kind
 	if k == syntaxhighlight.Whitespace {
-		return ""
+		return termbox.ColorRed
 	}
 
 	kind, ok := kindsByKind[k]
@@ -116,18 +117,22 @@ func (c ColorPalettes) Get(k syntaxhighlight.Kind) string {
 	return c[kind]
 }
 
-func (c ColorPalettes) String() string {
-	var s []string
-	for _, k := range kinds {
-		color := c[k]
-		s = append(s, fmt.Sprintf("%13s\t%s", k.Name, Colorize(color, color)))
-	}
-
-	return strings.Join(s, "\n")
-}
+// func (c ColorPalettes) String() string {
+// 	var s []string
+// 	for _, k := range kinds {
+// 		color := c[k]
+// 		s = append(s, fmt.Sprintf("%13s\t%s", k.Name, Colorize(color, color)))
+// 	}
+//
+// 	return strings.Join(s, "\n")
+// }
 
 func CPrint(r io.Reader, w io.Writer, palettes ColorPalettes) error {
-	return syntaxhighlight.Print(syntaxhighlight.NewScannerReader(r), w, Printer{palettes})
+	return syntaxhighlight.Print(
+		syntaxhighlight.NewScannerReader(r),
+		w,
+		Printer{palettes},
+	)
 }
 
 type Printer struct {
@@ -135,45 +140,10 @@ type Printer struct {
 }
 
 func (p Printer) Print(w io.Writer, kind syntaxhighlight.Kind, tokText string) error {
-	c := p.ColorPalettes.Get(kind)
-	if len(c) > 0 {
-		tokText = Colorize(c, tokText)
-	}
-
-	_, err := io.WriteString(w, tokText)
-
-	return err
-}
-
-func HtmlPrint(r io.Reader, w io.Writer, palettes ColorPalettes) error {
-	keys := []string{}
-	for k := range htmlCodes {
-		keys = append(keys, k)
-	}
-	sort.Strings(keys)
-	w.Write([]byte("<style>\n"))
-	for _, s := range keys {
-		if s == "" {
-			continue
-		}
-		w.Write([]byte(fmt.Sprintf(".%s { color: %s; }\n", s, s)))
-	}
-	w.Write([]byte("</style>\n"))
-	w.Write([]byte("<pre>\n"))
-	err := syntaxhighlight.Print(syntaxhighlight.NewScannerReader(r), w, HtmlCodePrinter{palettes})
-	w.Write([]byte("\n</pre>\n"))
-	return err
-}
-
-type HtmlCodePrinter struct {
-	ColorPalettes ColorPalettes
-}
-
-func (p HtmlCodePrinter) Print(w io.Writer, kind syntaxhighlight.Kind, tokText string) error {
-	c := p.ColorPalettes.Get(kind)
-	if len(c) > 0 {
-		tokText = Htmlize(c, tokText)
-	}
+	// c := p.ColorPalettes.Get(kind)
+	// if len(c) > 0 {
+	// 	tokText = Colorize(c, tokText)
+	// }
 
 	_, err := io.WriteString(w, tokText)
 
