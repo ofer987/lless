@@ -30,10 +30,10 @@ func handle(fpath string, colorPalettes ColorPalettes) {
 		case ev := <-eventQueue:
 			if ev.Type == termbox.EventKey {
 				switch {
-				case ev.Ch == 'd':
+				case ev.Ch == 'd' || ev.Key == termbox.KeyCtrlD:
 					s.jumpDown()
 					s.Render()
-				case ev.Ch == 'u':
+				case ev.Ch == 'u' || ev.Key == termbox.KeyCtrlU:
 					s.jumpUp()
 					s.Render()
 				case ev.Key == termbox.KeyArrowDown || ev.Ch == 'j':
@@ -48,7 +48,7 @@ func handle(fpath string, colorPalettes ColorPalettes) {
 				case ev.Key == termbox.KeyArrowRight || ev.Ch == 'l':
 					s.moveRight()
 					s.Render()
-				case ev.Key == termbox.KeyEsc || ev.Ch == 'q' || ev.Key == termbox.KeyCtrlC || ev.Key == termbox.KeyCtrlD:
+				case ev.Key == termbox.KeyEsc || ev.Ch == 'q' || ev.Key == termbox.KeyCtrlC:
 					return
 				}
 			}
