@@ -1,22 +1,22 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"os"
 
-	"github.com/mattn/go-colorable"
 	"github.com/nsf/termbox-go"
 	"github.com/sourcegraph/syntaxhighlight"
 )
 
 var x, y int
 
-var stdout io.Writer
-
 type Stream struct {
-	filePath      string
+	reader        *bytes.Reader
 	colorPalettes ColorPalettes
+	lenLines      int
 }
 
 func NewStream(fpath string, colorPalettes ColorPalettes) (*Stream, error) {
@@ -28,7 +28,6 @@ func NewStream(fpath string, colorPalettes ColorPalettes) (*Stream, error) {
 	if err != nil {
 		return nil, err
 	}
-	stdout = colorable.NewColorableStdout()
 
 	fi, err := file.Stat()
 	if err != nil {
@@ -39,8 +38,14 @@ func NewStream(fpath string, colorPalettes ColorPalettes) (*Stream, error) {
 		return nil, fmt.Errorf("%s is a directory", file.Name())
 	}
 
+	fileContents, err := ioutil.ReadFile(fpath)
+	if err != nil {
+		return nil, err
+	}
+
+	s.reader = bytes.NewReader(fileContents)
 	s.colorPalettes = colorPalettes
-	s.filePath = fpath
+	s.lenLines = lenLines(string(fileContents))
 
 	x = 0
 	y = 0
@@ -51,22 +56,6 @@ func NewStream(fpath string, colorPalettes ColorPalettes) (*Stream, error) {
 func (s *Stream) Render() {
 	originalX := x
 	originalY := y
-
-	file, err := os.Open(s.filePath)
-	defer file.Close()
-
-	if err != nil {
-		panic(err)
-	}
-
-	fi, err := file.Stat()
-	if err != nil {
-		panic(err)
-	}
-
-	if fi.Mode().IsDir() {
-		panic(fmt.Errorf("%s is a directory", file.Name()))
-	}
 
 	termbox.Clear(termbox.ColorWhite, termbox.ColorWhite)
 
@@ -82,25 +71,57 @@ func (s *Stream) Render() {
 	// x = originalX
 	termbox.Flush()
 	syntaxhighlight.Print(
-		syntaxhighlight.NewScannerReader(file),
-		stdout,
+		syntaxhighlight.NewScannerReader(s.reader),
+		nil,
 		s,
 	)
+	if _, err := s.reader.Seek(0, 0); err != nil {
+		panic(err)
+	}
 
 	x = originalX
 	y = originalY
 }
 
+func (s *Stream) CloseStream() {
+}
+
+func (s *Stream) jumpUp() {
+	remainingLines := 0 - y
+
+	if remainingLines >= 10 {
+		y += 10
+	} else if remainingLines < 10 && remainingLines > 0 {
+		y += remainingLines
+	}
+}
+
+func (s *Stream) jumpDown() {
+	remainingLines := s.lenLines + y
+
+	if remainingLines >= 10 {
+		y -= 10
+	} else if remainingLines < 10 && remainingLines > 0 {
+		y -= remainingLines
+	}
+}
+
 func (s *Stream) moveDown() {
-	y--
+	if s.lenLines+y > 0 {
+		y--
+	}
 }
 
 func (s *Stream) moveUp() {
-	y++
+	if y < 0 {
+		y++
+	}
 }
 
 func (s *Stream) moveLeft() {
-	x--
+	if x > 0 {
+		x--
+	}
 }
 
 func (s *Stream) moveRight() {
@@ -125,4 +146,15 @@ func (s *Stream) Print(w io.Writer, kind syntaxhighlight.Kind, tokText string) e
 
 	termbox.Flush()
 	return nil
+}
+
+func lenLines(s string) int {
+	result := 0
+	for _, c := range s {
+		if c == '\n' {
+			result++
+		}
+	}
+
+	return result
 }

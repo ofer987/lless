@@ -15,6 +15,7 @@ func handle(fpath string, colorPalettes ColorPalettes) {
 	if err != nil {
 		panic(err)
 	}
+	defer s.CloseStream()
 	s.Render()
 
 	eventQueue := make(chan termbox.Event)
@@ -29,6 +30,12 @@ func handle(fpath string, colorPalettes ColorPalettes) {
 		case ev := <-eventQueue:
 			if ev.Type == termbox.EventKey {
 				switch {
+				case ev.Ch == 'd':
+					s.jumpDown()
+					s.Render()
+				case ev.Ch == 'u':
+					s.jumpUp()
+					s.Render()
 				case ev.Key == termbox.KeyArrowDown || ev.Ch == 'j':
 					s.moveDown()
 					s.Render()
