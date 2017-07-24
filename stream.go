@@ -23,6 +23,8 @@ func NewStream(fpath string, colorPalettes ColorPalettes) (*Stream, error) {
 	s := new(Stream)
 
 	file, err := os.Open(fpath)
+	defer file.Close()
+
 	if err != nil {
 		return nil, err
 	}
@@ -47,7 +49,12 @@ func NewStream(fpath string, colorPalettes ColorPalettes) (*Stream, error) {
 }
 
 func (s *Stream) Render() {
+	originalX := x
+	originalY := y
+
 	file, err := os.Open(s.filePath)
+	defer file.Close()
+
 	if err != nil {
 		panic(err)
 	}
@@ -79,6 +86,9 @@ func (s *Stream) Render() {
 		stdout,
 		s,
 	)
+
+	x = originalX
+	y = originalY
 }
 
 func (s *Stream) moveDown() {
@@ -101,19 +111,21 @@ func (s *Stream) Print(w io.Writer, kind syntaxhighlight.Kind, tokText string) e
 	color := s.colorPalettes.Get(kind)
 
 	// termbox.SetCell(x, y, 'c', termbox.ColorRed, termbox.ColorWhite)
-	originalX := x
-	originalY := y
+	// originalX := x
+	// originalY := y
 	for _, c := range tokText {
 		if c == '\n' {
 			x = 0
 			y++
+		} else if c == '\t' {
+			x += 4
 		} else {
 			termbox.SetCell(x, y, c, color, termbox.ColorWhite)
 			x++
 		}
 	}
-	x = originalX
-	y = originalY
+	// x = originalX
+	// y = originalY
 
 	termbox.Flush()
 	return nil
