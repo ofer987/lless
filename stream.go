@@ -110,9 +110,6 @@ func (s *Stream) moveRight() {
 func (s *Stream) Print(w io.Writer, kind syntaxhighlight.Kind, tokText string) error {
 	color := s.colorPalettes.Get(kind)
 
-	// termbox.SetCell(x, y, 'c', termbox.ColorRed, termbox.ColorWhite)
-	// originalX := x
-	// originalY := y
 	for _, c := range tokText {
 		if c == '\n' {
 			x = 0
@@ -120,12 +117,11 @@ func (s *Stream) Print(w io.Writer, kind syntaxhighlight.Kind, tokText string) e
 		} else if c == '\t' {
 			x += 4
 		} else {
+
 			termbox.SetCell(x, y, c, color, termbox.ColorWhite)
 			x++
 		}
 	}
-	// x = originalX
-	// y = originalY
 
 	termbox.Flush()
 	return nil
