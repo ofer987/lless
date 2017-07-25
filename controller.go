@@ -16,7 +16,8 @@ func handle(fpath string, colorPalettes ColorPalettes) {
 		panic(err)
 	}
 	defer s.CloseStream()
-	s.Render()
+	t := s.Read()
+	t.Render()
 
 	eventQueue := make(chan termbox.Event)
 	go func() {
@@ -31,23 +32,23 @@ func handle(fpath string, colorPalettes ColorPalettes) {
 			if ev.Type == termbox.EventKey {
 				switch {
 				case ev.Ch == 'd' || ev.Key == termbox.KeyCtrlD:
-					s.jumpDown()
-					s.Render()
+					t.jumpDown()
+					t.Render()
 				case ev.Ch == 'u' || ev.Key == termbox.KeyCtrlU:
-					s.jumpUp()
-					s.Render()
+					t.jumpUp()
+					t.Render()
 				case ev.Key == termbox.KeyArrowDown || ev.Ch == 'j':
-					s.moveDown()
-					s.Render()
+					t.moveDown()
+					t.Render()
 				case ev.Key == termbox.KeyArrowUp || ev.Ch == 'k':
-					s.moveUp()
-					s.Render()
+					t.moveUp()
+					t.Render()
 				case ev.Key == termbox.KeyArrowLeft || ev.Ch == 'h':
-					s.moveLeft()
-					s.Render()
+					t.moveLeft()
+					t.Render()
 				case ev.Key == termbox.KeyArrowRight || ev.Ch == 'l':
-					s.moveRight()
-					s.Render()
+					t.moveRight()
+					t.Render()
 				case ev.Key == termbox.KeyEsc || ev.Ch == 'q' || ev.Key == termbox.KeyCtrlC:
 					return
 				}
