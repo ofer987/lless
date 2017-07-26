@@ -4,20 +4,14 @@ import (
 	"github.com/nsf/termbox-go"
 )
 
-func displayLoop(fpath string, colorPalettes ColorPalettes) {
+func displayText(t Text) {
 	err := termbox.Init()
 	if err != nil {
 		panic(err)
 	}
 	defer termbox.Close()
-	termbox.SetOutputMode(termbox.Output256)
 
-	s, err := NewStream(fpath, colorPalettes)
-	if err != nil {
-		panic(err)
-	}
-	defer s.CloseStream()
-	t := s.Read()
+	termbox.SetOutputMode(termbox.Output256)
 	t.Render()
 
 	eventQueue := make(chan termbox.Event)

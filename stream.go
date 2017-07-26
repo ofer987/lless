@@ -1,29 +1,32 @@
 package main
 
 import (
-	"bytes"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"os"
 
 	"github.com/nsf/termbox-go"
 	"github.com/sourcegraph/syntaxhighlight"
 )
 
-var x, y int
-
 type Stream struct {
-	reader        *bytes.Reader
+	reader        *os.File
 	colorPalettes ColorPalettes
 	text          Text
 }
 
-func NewStream(fpath string, colorPalettes ColorPalettes) (*Stream, error) {
-	s := new(Stream)
+func NewStdinStream(colorPalettes ColorPalettes) (*Stream, error) {
+	file := os.Stdin
+	if file == nil {
+		return nil, fmt.Errorf("cannot read from standard in")
+	}
 
+	s := &Stream{reader: file, colorPalettes: colorPalettes}
+	return s, nil
+}
+
+func NewFileStream(fpath string, colorPalettes ColorPalettes) (*Stream, error) {
 	file, err := os.Open(fpath)
-	defer file.Close()
 
 	if err != nil {
 		return nil, err
@@ -38,24 +41,14 @@ func NewStream(fpath string, colorPalettes ColorPalettes) (*Stream, error) {
 		return nil, fmt.Errorf("%s is a directory", file.Name())
 	}
 
-	fileContents, err := ioutil.ReadFile(fpath)
-	if err != nil {
-		return nil, err
+	s := &Stream{
+		reader:        file,
+		colorPalettes: colorPalettes,
 	}
-
-	s.reader = bytes.NewReader(fileContents)
-	s.colorPalettes = colorPalettes
-
-	x = 0
-	y = 0
-
 	return s, nil
 }
 
-func (s *Stream) Read() *Text {
-	termbox.Clear(termbox.ColorWhite, termbox.ColorWhite)
-	termbox.Flush()
-
+func (s *Stream) Read() Text {
 	s.text = Text{lines: make([]Line, 1)}
 
 	syntaxhighlight.Print(
@@ -64,13 +57,14 @@ func (s *Stream) Read() *Text {
 		s,
 	)
 
-	return &s.text
+	return s.text
 }
 
-func (s *Stream) CloseStream() {
+func (s *Stream) Close() error {
+	return s.reader.Close()
 }
 
-func (s *Stream) Print(w io.Writer, kind syntaxhighlight.Kind, tokText string) error {
+func (s *Stream) Print(_ io.Writer, kind syntaxhighlight.Kind, tokText string) error {
 	for _, c := range tokText {
 		if c == '\n' {
 			newLine := Line{}
@@ -84,9 +78,23 @@ func (s *Stream) Print(w io.Writer, kind syntaxhighlight.Kind, tokText string) e
 			}
 		} else {
 			lastLine := s.text.lastLine()
-			s.text.lines[len(s.text.lines)-1] = append(*lastLine, Char{c, s.colorPalettes.Get(kind)})
+			s.text.lines[len(s.text.lines)-1] = append(*lastLine, Char{c, s.get(kind)})
 		}
 	}
 
 	return nil
+}
+
+func (s *Stream) get(k syntaxhighlight.Kind) termbox.Attribute {
+	// ignore whitespace kind
+	if k == syntaxhighlight.Whitespace {
+		return termbox.ColorRed
+	}
+
+	v, ok := s.colorPalettes[k]
+	if !ok {
+		panic(fmt.Sprintf("Unknown syntax highlight kind %d\n", k))
+	}
+
+	return v
 }

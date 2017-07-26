@@ -21,7 +21,7 @@ func (t Text) lastLine() *Line {
 	return &t.lines[len(t.lines)-1]
 }
 
-func (t Text) Render() {
+func (t *Text) Render() {
 	termbox.Clear(termbox.ColorWhite, termbox.ColorWhite)
 
 	for y, line := range t.lines[t.y:] {

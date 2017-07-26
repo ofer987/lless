@@ -1,8 +1,6 @@
 package main
 
 import (
-	"fmt"
-
 	"github.com/nsf/termbox-go"
 	"github.com/sourcegraph/syntaxhighlight"
 )
@@ -40,21 +38,3 @@ var (
 )
 
 type ColorPalettes map[syntaxhighlight.Kind]termbox.Attribute
-
-func (c ColorPalettes) Set(k syntaxhighlight.Kind, v termbox.Attribute) {
-	c[k] = v
-}
-
-func (c ColorPalettes) Get(k syntaxhighlight.Kind) termbox.Attribute {
-	// ignore whitespace kind
-	if k == syntaxhighlight.Whitespace {
-		return termbox.ColorRed
-	}
-
-	v, ok := c[k]
-	if !ok {
-		panic(fmt.Sprintf("Unknown syntax highlight kind %d\n", k))
-	}
-
-	return v
-}
