@@ -4,7 +4,7 @@ import (
 	"github.com/nsf/termbox-go"
 )
 
-func handle(fpath string, colorPalettes ColorPalettes) {
+func displayLoop(fpath string, colorPalettes ColorPalettes) {
 	err := termbox.Init()
 	if err != nil {
 		panic(err)

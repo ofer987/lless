@@ -2,7 +2,6 @@ package main
 
 import (
 	"errors"
-	"fmt"
 	"log"
 
 	"github.com/mattn/go-colorable"
@@ -36,30 +35,13 @@ func (c *ccatCmd) Run(cmd *cobra.Command, args []string) {
 		colorPalettes = LightColorPalettes
 	}
 
-	if c.ShowPalette {
-		fmt.Fprintf(stdout, `Applied color codes:
-
-%s
-
-Color code is in the format of:
-
-  color       normal color
-  *color*     bold color
-  _color_     underlined color
-  +color+     blinking color
-
-Value of color can be %s
-`, colorPalettes, colorCodes)
-		return
-	}
-
 	if len(args) < 1 {
 		err := errors.New("Have to specify at least one filename")
 		log.Fatal(err)
 
 		return
 	}
-	handle(args[0], colorPalettes)
+	displayLoop(args[0], colorPalettes)
 }
 
 func main() {
@@ -72,7 +54,6 @@ func main() {
   $ ccat --bg=dark FILE1 FILE2 ... # dark background
   $ ccat --html # output html
   $ ccat -G String="_darkblue_" -G Plaintext="darkred" FILE # set color codes
-  $ ccat --palette # show palette
   $ ccat # read from standard input
   $ curl https://raw.githubusercontent.com/jingweno/ccat/master/main.go | ccat`,
 		Run: ccatCmd.Run,

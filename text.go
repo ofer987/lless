@@ -48,13 +48,13 @@ func (t *Text) jumpDown() {
 
 	if remainingLines >= 10 {
 		t.y += 10
-	} else if remainingLines > 0 && remainingLines < 10 {
-		t.y += remainingLines
+	} else if remainingLines > 5 && remainingLines < 10 {
+		t.y += remainingLines - 5
 	}
 }
 
 func (t *Text) moveDown() {
-	if t.y < len(t.lines) {
+	if t.y < len(t.lines)-2 {
 		t.y++
 	}
 }
