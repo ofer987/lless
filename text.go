@@ -53,6 +53,14 @@ func (t *Text) jumpDown() {
 	}
 }
 
+func (t *Text) goToFirstLine() {
+	t.y = 0
+}
+
+func (t *Text) goToLastLine() {
+	t.y = len(t.lines) - 2
+}
+
 func (t *Text) moveDown() {
 	if t.y < len(t.lines)-2 {
 		t.y++

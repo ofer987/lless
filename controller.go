@@ -31,6 +31,12 @@ func displayLoop(fpath string, colorPalettes ColorPalettes) {
 		case ev := <-eventQueue:
 			if ev.Type == termbox.EventKey {
 				switch {
+				case ev.Ch == 'g':
+					t.goToFirstLine()
+					t.Render()
+				case ev.Ch == 'G':
+					t.goToLastLine()
+					t.Render()
 				case ev.Ch == 'd' || ev.Key == termbox.KeyCtrlD:
 					t.jumpDown()
 					t.Render()
