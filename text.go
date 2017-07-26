@@ -36,8 +36,8 @@ func (t Text) Render() {
 func (t *Text) jumpUp() {
 	remainingLines := t.y
 
-	if remainingLines >= 10 {
-		t.y -= 10
+	if remainingLines >= 22 {
+		t.y -= 22
 	} else if remainingLines > 0 && remainingLines < 10 {
 		t.y -= remainingLines
 	}
@@ -46,8 +46,8 @@ func (t *Text) jumpUp() {
 func (t *Text) jumpDown() {
 	remainingLines := len(t.lines) - t.y
 
-	if remainingLines >= 10 {
-		t.y += 10
+	if remainingLines >= 22 {
+		t.y += 22
 	} else if remainingLines > 5 && remainingLines < 10 {
 		t.y += remainingLines - 5
 	}
