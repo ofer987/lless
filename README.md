@@ -36,8 +36,7 @@ $ go get -u github.com/jingweno/lless
 ## Usage
 
 ```
-$ lless FILE1
-$ lless FILE1 FILE2 ... --html # output in HTML
+$ lless FILE
 $ lless --bg=dark FILE ... # dark background
 $ lless # read from standard input
 $ curl https://raw.githubusercontent.com/jingweno/lless/master/main.go | lless
