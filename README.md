@@ -49,7 +49,7 @@ It's recommended to alias `lless` to `less`:
 alias less=lless
 ```
 
-You can always invoke `less` after aliasing `lless` by typing `\less`.
+You can always invoke `less` after aliasing `lless` by typing `\less` (in Bash).
 
 ## License
 
