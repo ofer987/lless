@@ -1,3 +1,3 @@
 #!/bin/bash -e
 
-go build -o bin/ccat
+go build -o bin/lless

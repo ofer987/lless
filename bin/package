@@ -33,7 +33,7 @@ compress() {
 
 OSARCH="darwin/amd64 linux/amd64 linux/386 windows/amd64 windows/386"
 
-echo "Packaging ccat $(version)"
+echo "Packaging lless $(version)"
 echo
 
 go get -u github.com/mitchellh/gox

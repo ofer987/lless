@@ -12,7 +12,7 @@ const (
 	readFromStdin = "-"
 )
 
-type ccatCmd struct {
+type llessCmd struct {
 	BG          string
 	Color       string
 	HTML        bool
@@ -20,7 +20,7 @@ type ccatCmd struct {
 	ShowVersion bool
 }
 
-func (c *ccatCmd) Run(cmd *cobra.Command, args []string) {
+func (c *llessCmd) Run(cmd *cobra.Command, args []string) {
 	stdout := colorable.NewColorableStdout()
 
 	if c.ShowVersion {
@@ -46,17 +46,17 @@ func (c *ccatCmd) Run(cmd *cobra.Command, args []string) {
 
 func main() {
 	log.SetFlags(0)
-	ccatCmd := &ccatCmd{}
+	llessCmd := &llessCmd{}
 	rootCmd := &cobra.Command{
-		Use:  "ccat [OPTION]... [FILE]...",
+		Use:  "lless [OPTION]... [FILE]...",
 		Long: "Colorize FILE(s), or standard input, to standard output.",
-		Example: `$ ccat FILE1 FILE2 ...
-  $ ccat --bg=dark FILE1 FILE2 ... # dark background
-  $ ccat --html # output html
-  $ ccat -G String="_darkblue_" -G Plaintext="darkred" FILE # set color codes
-  $ ccat # read from standard input
-  $ curl https://raw.githubusercontent.com/jingweno/ccat/master/main.go | ccat`,
-		Run: ccatCmd.Run,
+		Example: `$ lless FILE1 FILE2 ...
+  $ lless --bg=dark FILE1 FILE2 ... # dark background
+  $ lless --html # output html
+  $ lless -G String="_darkblue_" -G Plaintext="darkred" FILE # set color codes
+  $ lless # read from standard input
+  $ curl https://raw.githubusercontent.com/jingweno/lless/master/main.go | lless`,
+		Run: llessCmd.Run,
 	}
 
 	usageTempl := `{{ $cmd := . }}
@@ -66,7 +66,7 @@ Usage:
 Flags:
 {{.LocalFlags.FlagUsages}}
 Using color is auto both by default and with --color=auto. With --color=auto,
-ccat emits color codes only when standard output is connected to a terminal.
+lless emits color codes only when standard output is connected to a terminal.
 Color codes can be changed with -G KEY=VALUE. List of color codes can
 be found with --palette.
 
@@ -75,12 +75,12 @@ Examples:
 `
 	rootCmd.SetUsageTemplate(usageTempl)
 
-	rootCmd.PersistentFlags().StringVarP(&ccatCmd.BG, "bg", "", "light", `set to "light" or "dark" depending on the terminal's background`)
-	rootCmd.PersistentFlags().StringVarP(&ccatCmd.Color, "color", "C", "auto", `colorize the output; value can be "never", "always" or "auto"`)
-	// rootCmd.PersistentFlags().VarP(&ccatCmd.ColorCodes, "color-code", "G", `set color codes`)
-	rootCmd.PersistentFlags().BoolVarP(&ccatCmd.HTML, "html", "", false, `output html`)
-	rootCmd.PersistentFlags().BoolVarP(&ccatCmd.ShowPalette, "palette", "", false, `show color palettes`)
-	rootCmd.PersistentFlags().BoolVarP(&ccatCmd.ShowVersion, "version", "v", false, `show version`)
+	rootCmd.PersistentFlags().StringVarP(&llessCmd.BG, "bg", "", "light", `set to "light" or "dark" depending on the terminal's background`)
+	rootCmd.PersistentFlags().StringVarP(&llessCmd.Color, "color", "C", "auto", `colorize the output; value can be "never", "always" or "auto"`)
+	// rootCmd.PersistentFlags().VarP(&llessCmd.ColorCodes, "color-code", "G", `set color codes`)
+	rootCmd.PersistentFlags().BoolVarP(&llessCmd.HTML, "html", "", false, `output html`)
+	rootCmd.PersistentFlags().BoolVarP(&llessCmd.ShowPalette, "palette", "", false, `show color palettes`)
+	rootCmd.PersistentFlags().BoolVarP(&llessCmd.ShowVersion, "version", "v", false, `show version`)
 
 	rootCmd.Execute()
 }
