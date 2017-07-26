@@ -10,6 +10,7 @@ func displayLoop(fpath string, colorPalettes ColorPalettes) {
 		panic(err)
 	}
 	defer termbox.Close()
+	termbox.SetOutputMode(termbox.Output256)
 
 	s, err := NewStream(fpath, colorPalettes)
 	if err != nil {
