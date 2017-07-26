@@ -27,7 +27,7 @@ Download the latest [compiled binaries](https://github.com/jingweno/lless/releas
 
 Prerequisites:
 - [Git](http://git-scm.com/book/en/v2/Getting-Started-Installing-Git)
-- [Go](https://golang.org/doc/install) 1.4+
+- [Go](https://golang.org/doc/install) 1.8.3+
 
 ```
 $ go get -u github.com/jingweno/lless
@@ -52,7 +52,7 @@ You can always invoke `less` after aliasing `lless` by typing `\less` (in Bash).
 
 ## License
 
-[MIT](https://github.com/jingweno/lless/blob/master/LICENSE)
+[MIT](https://github.com/ofer987/lless/blob/master/LICENSE)
 
 ## Acknowledgements
 
